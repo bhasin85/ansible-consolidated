@@ -1,0 +1,81 @@
+- hosts: all
+  roles:
+     - yaegashi.blockinfile
+  gather_facts: yes
+  sudo: yes
+  vars:
+      # Todo specify the bridge interface and address range etc to make it possible 
+      # to set up more than one.
+  tasks:
+
+    - apt: name=bridge-utils
+
+    - blockinfile:
+        dest: /etc/network/interfaces
+        backup: yes
+        content: |
+          auto br0
+          iface br0 inet static
+            address 10.10.1.1
+            netmask 255.255.255.0
+            bridge_ports dummy0
+            bridge_stp off
+            bridge_fd 0
+            post-up echo 1 > /proc/sys/net/ipv4/ip_forward
+            post-up   iptables -t nat -A POSTROUTING -s '10.10.1.0/24' -j MASQUERADE
+            post-down iptables -t nat -D POSTROUTING -s '10.10.1.0/24' -j MASQUERADE
+      notify: restart br0
+
+
+    - apt: name=dnsmasq
+
+    - blockinfile:
+        dest: /etc/dnsmasq.d/container-dns
+        create: true
+        content: |
+          # the interface
+          interface=br0
+          # range for leases
+          #dhcp-range=br0,10.10.1.10.100.1.1.20,4h
+          dhcp-range=br0,10.10.1.10,10.10.1.20,4h
+          # mapping dhcp ether -> ip
+          dhcp-host=3a:55:c9:58:82:00,10.10.1.14
+          # note we can set the mac address in the container in /etc/network/interfaces
+          # hwaddress ether 00:01:04:1b:2C:1F
+          dhcp-host=00:01:04:1b:2C:1F,10.10.1.15
+          address=/whoot1/10.10.1.15
+
+          dhcp-host= 00:01:04:1b:2C:1A,10.10.1.18
+          address=/wily/10.10.1.18
+      notify: restart dnsmasq
+
+    # add local dns to our host resolv.conf
+    - lineinfile: dest=/etc/resolv.conf backup=true state=present insertbefore='nameserver.*' line='nameserver 10.10.1.1'
+
+
+    # prevent from being overwritten by host dhcp
+    - lineinfile: dest=/etc/dhcp/dhclient.conf backup=true state=present backrefs=yes regexp='(.*)domain-name-servers,(.*)' line='\1\2'
+
+    # ip forwarding for nat - debian only?
+    - lineinfile: dest=/etc/sysctl.conf backup=true state=present regexp='.*net.ipv4.ip_forward.*' line='net.ipv4.ip_forward = 1'
+      notify: reload sysctl
+
+
+
+    # TODO shouldn't be here
+    - apt: name=systemd-container
+      when: (ansible_distribution == "Debian" and ansible_distribution_major_version > "8")
+    
+    - apt: name=debootstrap
+
+  handlers:
+    - name: restart br0
+      command: bash -c "ifdown br0 && ifup br0"
+
+    - name: restart dnsmasq
+      command: bash -c "systemctl restart dnsmasq"
+
+    - name: reload sysctl
+      command: /sbin/sysctl -p /etc/sysctl.conf
+
+# think can use register variables as alternative to notify

@@ -1,0 +1,127 @@
+# test with,
+# speaker-test -t wav -c 2    (*human voice works*)
+# need to reboot twice - eg. once for soundcard and then alsa init
+# complicated by luks
+
+- hosts: all
+  roles:
+     - yaegashi.blockinfile
+  sudo: no
+  vars:
+
+    - upgrade_type: safe
+  tasks:
+
+    - template: src=templates/sources.j2 dest=/etc/apt/sources.list mode=0644
+
+    # not dist upgrade 
+    - name: Apt update and upgrade
+      apt: state=latest update_cache=yes upgrade={{upgrade_type}}
+
+    # https://realguess.net/2014/12/21/ansible-update-servers-to-the-latest-and-reboot/
+    # http://docs.ansible.com/ansible/playbooks_conditionals.html
+    # Should be last task
+    - name: Check reboot is required
+      register: file
+      stat: path=/var/run/reboot-required get_md5=no
+
+    # Must reboot before continue, not in a handler
+    - name: Reboot the server
+      command: /sbin/reboot
+      when: file.stat.exists == true
+
+    # deploy mount files
+    # - template: src=templates/mount.j2 dest=/root/mount.sh mode=0755
+    # - template: src=templates/unmount.j2 dest=/root/unmount.sh mode=0755
+
+    # now in zfs-compile
+    # - template: src=templates/zfs-mount.j2 dest=/root/zfs-mount.sh mode=0755
+    # - template: src=templates/zfs-unmount.j2 dest=/root/zfs-unmount.sh mode=0755
+
+
+ 
+      # TODO need to add entry to /etc/hosts 
+      # - hostname: name={{hostname}}
+
+      # name: Update and upgrade
+      # apt: state=latest update_cache=yes upgrade=safe
+      # apt: state=latest update_cache=yes upgrade=dist
+
+    - name: Memtest
+      apt: name=memtest86
+
+    # Log is at /var/log/fail2ban.log
+    - name: Fail2ban
+      apt: name=fail2ban
+
+    - include: tasks/sudoers.yml
+
+
+    - name: Disable shell bell
+      replace: dest=/etc/inputrc backup=true regexp='#.*(set bell-style visible.*)' replace='\1'
+
+
+    - apt: name=alsa-oss
+    - apt: name=alsa-utils
+    - apt: name=alsa-tools
+    
+    - name: Setup soundcard
+      blockinfile:
+        dest: /etc/modprobe.d/alsa-base.conf
+        create: true
+        content: |
+          # hdmi and cth reversed
+          options snd_hda_intel enable=0,1
+
+          # hardware beep off
+          options snd_hda_intel beep_mode=0
+          blacklist pcspkr
+      notify: reboot
+
+
+    - name: Initialize alsa
+      command: bash -c "/usr/sbin/alsactl"
+      args:
+        creates: /var/lib/alsa/asound.state       # untested
+      notify: reboot
+
+
+    # couldn't get apt_repository to work
+    # https://github.com/ansible/ansible/issues/2352
+    # None of this needed a reboot
+#    - name: Wifi Update sources.list 
+#      lineinfile:
+#      args:
+#        dest: /etc/apt/sources.list
+#        backup: true
+#        state: present
+#        line: "deb http://http.debian.net/debian/ testing main contrib non-free"
+      # when: ansible_distribution_version == 'stretch'  etc
+
+      # shoudl be notify
+#    - name: Update apt
+#      apt: state=latest update_cache=yes
+
+    - name: Install firmware
+      apt: name=firmware-iwlwifi
+
+    - name: Modprobe
+      # command: bash -c "modprobe -r iwlwifi ; modprobe iwlwifi"
+      modprobe: name=iwlwifi state=present
+
+    - name: Bring up interface
+      command: bash -c "/sbin/ifconfig wlp2s0 up"
+
+
+    - apt: name=wpasupplicant
+    # we may not have X installed yet
+    # - apt: name=wicd-gtk
+    - apt: name=wicd-curses
+
+
+  handlers:
+    - name: reboot
+      command: bash -c "/sbin/reboot"
+
+
+

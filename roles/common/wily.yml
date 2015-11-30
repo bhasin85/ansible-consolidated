@@ -1,0 +1,11 @@
+
+- hosts: all
+  tasks:
+    - hostname: name=wily
+    - include: tasks/sudoers.yml 
+    - include: tasks/meteo.yml user=meteo
+    - include: tasks/devenv.yml
+
+
+
+
