@@ -17,28 +17,10 @@
       # wheel gives su
       user: name={{user}} shell=/usr/local/bin/bash  groups=wheel append=yes
 
-
-
     - authorized_key: user={{user}} key="{{ lookup('file', '/home/meteo/.ssh/id_rsa.pub') }}" # "
 
  
     - pkgng: name=git
-
-#    - name: Checkout dotfiles
-#      git: repo=http://github.com/julian1/dotfiles.git dest=/home/{{user}}/dotfiles version=master
-#      sudo: true
-#      sudo_user: "{{user}}"
-
-#    - name: Install dotfiles
-#      shell: ./install.sh 2> installed.txt
-#      sudo: true
-#      sudo_user: "{{user}}"
-#      args:
-#        chdir: /home/{{user}}/dotfiles/
-#        creates: installed.txt
-
-    # x11-apps libxml2-utils net-tools curl
-    # Common tools
 
     - pkgng: name=vim-lite
     # - pkgng: name=git
