@@ -1,6 +1,6 @@
 
-  # the template takes ubuntu_version as an argument, would be nice
-  # to control this more explicitly
+  # the template takes {{mirror}} and {{ ubuntu_version}} as an argument, 
+  # would be nice to pass directly
 
   - template: src=templates/ubuntu-sources.j2 dest=/etc/apt/sources.list mode=0644 
   # not dist upgrade 
