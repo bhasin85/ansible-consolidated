@@ -1,8 +1,3 @@
-- hosts: all
-  gather_facts: yes
-  sudo: yes
-  vars:
-  tasks:
 
     - apt: name=xorg
     - apt: name=xmonad
