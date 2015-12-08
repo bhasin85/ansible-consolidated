@@ -1,6 +1,7 @@
 - hosts: all
   tasks:
     - hostname: name=wily
+    - include: tasks/sources.yml version=wily upgrade_type=safe mirror="http://mirror.aarnet.edu.au/ubuntu" 
     - include: tasks/sudoers.yml 
     - include: tasks/user.yml user=meteo
     - authorized_key: user=meteo key="{{ lookup('file', '/home/meteo/.ssh/id_rsa.pub') }}" # "

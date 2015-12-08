@@ -1,0 +1,9 @@
+
+  # the template takes ubuntu_version as an argument, would be nice
+  # to control this more explicitly
+
+  - template: src=templates/ubuntu-sources.j2 dest=/etc/apt/sources.list mode=0644 
+  # not dist upgrade 
+  - apt: state=latest update_cache=yes upgrade={{upgrade_type}}
+
+
