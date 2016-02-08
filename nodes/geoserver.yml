@@ -1,10 +1,12 @@
 
+# TODO - expose locale, expose ssh keys
+#  test runup from scratch
+
 - hosts: geoserver
   vars:
     - user: meteo
     - timezone: Australia/Hobart
     - mirror: http://mirror.internode.on.net/pub/debian
-    - template: debian.j2
     - version: jessie
     - upgrade: safe
     - geoserver:
@@ -23,27 +25,3 @@
     - basic
     - geoserver
   
-
-#  tasks:
-#    - include: >
-#        ../roles/distribution/tasks/main.yml
-#        mirror=http://mirror.internode.on.net/pub/debian
-#        template=debian.j2
-#        version=jessie
-#        upgrade=safe
-
-#    - include_vars: credentials.yml
-
-    # - include: ../roles/common/tasks/basic.yml
-    # - include: basic.yml
-
-    # - include: ../roles/postgres/tasks/main.yml
-    # - include: ../roles/geonetwork/tasks/drop-db.yml
-    # - include: ../roles/geonetwork/tasks/restore-db.yml
-
-    #- include: ../roles/geoserver/tasks/main.yml
-    # - include: ../roles/geoserver/tasks/main.yml
-
-#  handlers:
-#    - include: ../roles/common/handlers/main.yml
-
