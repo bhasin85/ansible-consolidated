@@ -9,15 +9,9 @@
     - mirror: http://mirror.internode.on.net/pub/debian
     - version: jessie
     - upgrade: safe
-    - geoserver:
-        jndi:
-          url: |
-            jdbc:postgresql://db-2-aws-syd.aodn.org.au:5432/harvest?\
-            loginTimeout=1000&amp;\
-            ssl=true&amp;\
-            sslfactory=org.postgresql.ssl.NonValidatingFactory\
-          username: x 
-          password: x 
+
+  vars_files:
+    - credentials.yml
 
   roles:
     - debian
