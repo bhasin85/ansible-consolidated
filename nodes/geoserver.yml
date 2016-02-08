@@ -1,5 +1,5 @@
 
-# TODO - expose locale, expose ssh keys
+# TODO - expose locale,
 #  test runup from scratch
 
 - hosts: geoserver
@@ -18,4 +18,4 @@
     - timezone
     - basic
     - geoserver
-  
+
