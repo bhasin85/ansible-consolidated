@@ -1,4 +1,6 @@
 
+# perhaps change name of basic to meteo, since this is highly-specific user environment
+
 #  - set_fact: user=meteo
 
   - apt: name=sudo
