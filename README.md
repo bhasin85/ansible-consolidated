@@ -1,4 +1,8 @@
 
+It may be that the indirection between node, and role for the node is a bit useless
+  with a one-to-one mapping. for nodes like apu
+  but is that really be an issue. the benefit is the much cleaner lookup paths
+
 ### Examples
 
 ```

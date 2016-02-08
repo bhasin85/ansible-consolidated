@@ -7,6 +7,15 @@
     - template: debian.j2
     - version: jessie
     - upgrade: safe
+    - geoserver:
+        jndi:
+          url: |
+            jdbc:postgresql://db-2-aws-syd.aodn.org.au:5432/harvest?\
+            loginTimeout=1000&amp;\
+            ssl=true&amp;\
+            sslfactory=org.postgresql.ssl.NonValidatingFactory\
+          username: x 
+          password: x 
 
   roles:
     - debian
@@ -15,7 +24,7 @@
     - geoserver
   
 
-  tasks:
+#  tasks:
 #    - include: >
 #        ../roles/distribution/tasks/main.yml
 #        mirror=http://mirror.internode.on.net/pub/debian
@@ -23,7 +32,7 @@
 #        version=jessie
 #        upgrade=safe
 
-    - include_vars: credentials.yml
+#    - include_vars: credentials.yml
 
     # - include: ../roles/common/tasks/basic.yml
     # - include: basic.yml
@@ -35,6 +44,6 @@
     #- include: ../roles/geoserver/tasks/main.yml
     # - include: ../roles/geoserver/tasks/main.yml
 
-  handlers:
-    - include: ../roles/common/handlers/main.yml
+#  handlers:
+#    - include: ../roles/common/handlers/main.yml
 
